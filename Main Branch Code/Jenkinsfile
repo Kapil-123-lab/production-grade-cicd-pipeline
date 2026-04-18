@@ -6,9 +6,9 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "kastrov/multibranch-flask-app"
-        GIT_USER   = "kastrokiran"
-        GIT_EMAIL  = "learnwithkastro@gmail.com"
+        IMAGE_NAME = "kapilkanaujiya/multibranch-flask-app"   // ✅ Your DockerHub
+        GIT_USER   = "kapil-123-lab"                          // ✅ Your GitHub username
+        GIT_EMAIL  = "kapilkanaujiya3@gmail.com"              // ✅ Your email
     }
 
     stages {
@@ -30,11 +30,11 @@ pipeline {
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                     )]) {
-                        sh """
+                        sh '''
                         docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        """
+                        '''
                     }
                 }
             }
@@ -49,21 +49,28 @@ pipeline {
                         usernameVariable: 'GIT_USERNAME',
                         passwordVariable: 'GIT_TOKEN'
                     )]) {
-                        sh """
+                        sh '''
                         set -e
+
                         git config user.name "$GIT_USER"
                         git config user.email "$GIT_EMAIL"
 
+                        # Ensure latest code
                         git fetch origin
                         git checkout main
                         git reset --hard origin/main
 
-                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" k8s/deployment.yml
+                        # Update image in deployment file
+                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" k8s/deployment.yaml
 
-                        git add k8s/deployment.yml
+                        git add k8s/deployment.yaml
+
+                        # Commit only if changes exist
                         git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
-                        git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/KastroVKiran/Multi-Branch-Prod.git main
-                        """
+
+                        # Push to YOUR repo
+                        git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/kapil-123-lab/production-grade-cicd-pipeline.git main
+                        '''
                     }
                 }
             }
