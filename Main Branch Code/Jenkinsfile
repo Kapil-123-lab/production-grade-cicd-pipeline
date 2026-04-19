@@ -26,7 +26,7 @@ pipeline {
                     env.IMAGE_TAG = "build-${BUILD_NUMBER}"
 
                     withCredentials([usernamePassword(
-                        credentialsId: 'production_id',
+                        credentialsId: 'dockerhub-creds',
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                     )]) {
@@ -45,7 +45,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(
-                        credentialsId: 'github-creds',
+                        credentialsId: 'production_id',
                         usernameVariable: 'GIT_USERNAME',
                         passwordVariable: 'GIT_TOKEN'
                     )]) {
